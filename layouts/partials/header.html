@@ -39,12 +39,6 @@
                 <a href="{{ .URL | absURL }}" class="inline-block text-lg text-gray-300 hover:text-white transition-colors duration-300 {{ if eq $currentPage.RelPermalink .URL }}text-white font-semibold{{ end }}">{{ .Name }}</a>
                 {{ end }}
             </nav>
-            <div class="hidden md:flex justify-end">
-                <div class="flex items-center">
-                    <span class="text-lg text-gray-300 mr-2">Local Time:</span>
-                    <div id="local-time" class="text-lg text-gray-300"></div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -64,12 +58,6 @@
                 <a href="{{ .URL | absURL }}" class="text-xl text-gray-300 hover:text-white transition-colors duration-300 {{ if eq $currentPage.RelPermalink .URL }}text-white font-semibold{{ end }}">{{ .Name }}</a>
                 {{ end }}
             </nav>
-            <div class="mt-auto p-6 border-t border-gray-800">
-                <div class="flex items-center justify-center">
-                    <span class="text-lg text-gray-300 mr-2">Local Time:</span>
-                    <div id="mobile-local-time" class="text-lg text-gray-300"></div>
-                </div>
-            </div>
         </div>
     </div>
 </header>
