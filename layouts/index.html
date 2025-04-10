@@ -5,7 +5,7 @@
 <div class="w-full md:w-4/5 lg:w-3/5 mx-auto px-14 py-12">
     <!-- Hero Section -->
     <section class="mb-16">
-        <div class="max-w-5xl ml-0 p-4 pb-2 border border-gray-00 rounded-lg bg-[#121212] shadow-lg relative">
+        <div class="max-w-7xl ml-0 p-4 pb-2 border border-gray-00 rounded-lg bg-[#121212] shadow-lg relative">
             
             <div class="text-left">
                 <h1 class="text-4xl font-bold mb-2">{{ .Site.Params.name }}</h1>
@@ -282,7 +282,7 @@
 
     <section>
         <h2 class="text-4xl font-bold mb-5">Experience</h2>
-        <div class="space-y-8 max-w-5xl mx-auto">
+        <div class="space-y-8 max-w-7xl mx-auto">
             {{ range $index, $exp := first 3 .Site.Params.experience }}
             <div class="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-0 before:w-[2px] before:h-full before:bg-gray-700 before:rounded-full">
                 {{ if eq .company "Open Source Contributor" }}
@@ -307,7 +307,7 @@
         <div class="flex justify-between items-center mb-6 md:mb-8">
             <h2 class="text-2xl md:text-4xl font-bold">Projects</h2>
         </div>
-        <div class="grid grid-cols-1 gap-6 md:gap-8 max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 gap-6 md:gap-8 max-w-7xl mx-auto">
             {{ range first 2 .Site.Params.projects }}
             <div class="project-card relative overflow-hidden rounded-lg bg-[#121212] border border-gray-700 transition-all duration-300 group">
                 <div class="aspect-w-16 aspect-h-9 overflow-hidden relative">
@@ -350,7 +350,7 @@
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-4xl font-bold">Blogs</h2>
         </div>
-        <div class="space-y-8 max-w-5xl mx-auto">
+        <div class="space-y-8 max-w-7xl mx-auto">
             {{ $regularPosts := slice }}
             {{ range where .Site.RegularPages "Section" "blogs" }}
                 {{ $post := dict "title" .Title "date" .Date "dateStr" (.Date.Format "January 2, 2006") "link" .RelPermalink "summary" (cond (isset .Params "summary") .Params.summary .Summary) "isExternal" false }}
@@ -458,7 +458,7 @@
     }
 }
 
-.max-w-5xl {
+.max-w-7xl {
     border-color: rgba(75, 85, 99, 0.7); 
 }
 
