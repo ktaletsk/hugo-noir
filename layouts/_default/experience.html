@@ -23,7 +23,17 @@
                     <div class="stat-number">20+</div>
                     <div class="stat-label">Courses Completed</div>
                 </div>
-                
+            </div>
+            <div class="mt-8 flex justify-center">
+                <div class="w-full max-w-md border border-gray-700 rounded-lg bg-[#121212] shadow-lg p-2">
+                    <a href="/resume.pdf" download class="resume-download-btn w-full flex justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v9.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414L9 13.586V4a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        Download Resume
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -176,6 +186,16 @@
     
     .github-link:hover::after {
         width: 100%;
+    }
+    
+    .resume-download-btn {
+        @apply flex items-center justify-center px-6 py-3 text-white font-medium rounded-lg transition-all duration-300;
+        background-color: #121212;
+    }
+    
+    .resume-download-btn:hover {
+        @apply text-blue-400;
+        transform: translateY(-1px);
     }
 </style>
 {{ end }} 
