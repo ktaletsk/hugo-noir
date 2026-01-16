@@ -1,0 +1,349 @@
+{{/* 
+  Text Compare Shortcode
+  Usage: {{< text-compare files="file1,file2,file3" >}}
+  
+  Parameters:
+  - files: comma-separated list of file names (files should be in /static/model-outputs/{name}.md)
+  - height: optional height for the content area (default: 500px)
+*/}}
+
+{{ $files := split (.Get "files") "," }}
+{{ $height := .Get "height" | default "500px" }}
+{{ $id := .Get "id" | default (printf "text-compare-%d" now.UnixNano) }}
+
+<style>
+  .text-compare-container {
+    margin: 1.5rem 0;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #1a1a1a;
+  }
+  
+  .text-compare-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #1f1f1f;
+    border-bottom: 1px solid #374151;
+  }
+  
+  .text-compare-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    flex: 1;
+  }
+  
+  .text-compare-tab {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  
+  .text-compare-tab:hover {
+    background: #2a2a2a;
+    color: #e5e7eb;
+  }
+  
+  .text-compare-tab.active {
+    background: #3b82f6;
+    color: white;
+  }
+  
+  .text-compare-view-toggle {
+    display: flex;
+    gap: 0.25rem;
+    background: #2a2a2a;
+    border-radius: 0.375rem;
+    padding: 0.25rem;
+  }
+  
+  .text-compare-view-btn {
+    padding: 0.375rem 0.75rem;
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+  }
+  
+  .text-compare-view-btn:hover {
+    color: #e5e7eb;
+  }
+  
+  .text-compare-view-btn.active {
+    background: #374151;
+    color: white;
+  }
+  
+  .text-compare-content {
+    display: flex;
+    overflow: hidden;
+  }
+  
+  .text-compare-panel {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    padding: 1rem 1.5rem;
+    background: #121212;
+    display: none;
+  }
+  
+  .text-compare-panel.active {
+    display: block;
+  }
+  
+  .text-compare-content.side-by-side .text-compare-panel {
+    display: block;
+    border-right: 1px solid #374151;
+  }
+  
+  .text-compare-content.side-by-side .text-compare-panel:last-child {
+    border-right: none;
+  }
+  
+  .text-compare-panel-header {
+    display: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #60a5fa;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #374151;
+    position: sticky;
+    top: 0;
+    background: #121212;
+    z-index: 10;
+  }
+  
+  .text-compare-content.side-by-side .text-compare-panel-header {
+    display: block;
+  }
+  
+  .text-compare-panel .prose {
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  
+  .text-compare-panel .prose h1 {
+    font-size: 1.25rem;
+    margin-top: 0;
+  }
+  
+  .text-compare-panel .prose h2 {
+    font-size: 1.125rem;
+  }
+  
+  .text-compare-panel .prose h3 {
+    font-size: 1rem;
+  }
+  
+  .text-compare-panel .prose pre {
+    font-size: 0.75rem;
+    padding: 0.75rem;
+    overflow-x: auto;
+  }
+  
+  .text-compare-panel .prose code {
+    font-size: 0.75rem;
+  }
+  
+  .text-compare-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #6b7280;
+  }
+  
+  .text-compare-error {
+    color: #ef4444;
+    padding: 1rem;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .text-compare-content.side-by-side {
+      flex-direction: column;
+    }
+    
+    .text-compare-content.side-by-side .text-compare-panel {
+      border-right: none;
+      border-bottom: 1px solid #374151;
+      max-height: 400px;
+    }
+    
+    .text-compare-content.side-by-side .text-compare-panel:last-child {
+      border-bottom: none;
+    }
+    
+    .text-compare-controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .text-compare-tabs {
+      justify-content: center;
+    }
+    
+    .text-compare-view-toggle {
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="text-compare-container" id="{{ $id }}">
+  <div class="text-compare-controls">
+    <div class="text-compare-tabs">
+      {{ range $i, $file := $files }}
+        {{ $fileName := trim $file " " }}
+        <button class="text-compare-tab{{ if eq $i 0 }} active{{ end }}" data-file="{{ $fileName }}">
+          {{ $fileName }}
+        </button>
+      {{ end }}
+    </div>
+    <div class="text-compare-view-toggle">
+      <button class="text-compare-view-btn active" data-view="tabs" title="Tabbed view">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="3" y1="9" x2="21" y2="9"></line>
+          <line x1="9" y1="3" x2="9" y2="9"></line>
+        </svg>
+      </button>
+      <button class="text-compare-view-btn" data-view="side-by-side" title="Side-by-side view">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="12" y1="3" x2="12" y2="21"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <div class="text-compare-content" style="height: {{ $height }};">
+    {{ range $i, $file := $files }}
+      {{ $fileName := trim $file " " }}
+      <div class="text-compare-panel{{ if eq $i 0 }} active{{ end }}" data-file="{{ $fileName }}">
+        <div class="text-compare-panel-header">{{ $fileName }}</div>
+        <div class="text-compare-loading">Loading...</div>
+      </div>
+    {{ end }}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+(function() {
+  const container = document.getElementById('{{ $id }}');
+  const tabs = container.querySelectorAll('.text-compare-tab');
+  const panels = container.querySelectorAll('.text-compare-panel');
+  const viewBtns = container.querySelectorAll('.text-compare-view-btn');
+  const content = container.querySelector('.text-compare-content');
+  
+  // Configure marked for safe rendering
+  marked.setOptions({
+    breaks: true,
+    gfm: true
+  });
+  
+  // Load markdown content for each panel
+  panels.forEach(async (panel) => {
+    const fileName = panel.dataset.file;
+    const loadingEl = panel.querySelector('.text-compare-loading');
+    
+    try {
+      const response = await fetch(`/model-outputs/${fileName}.md`);
+      if (!response.ok) throw new Error('Failed to load');
+      
+      const markdown = await response.text();
+      const html = marked.parse(markdown);
+      
+      loadingEl.remove();
+      const proseDiv = document.createElement('div');
+      proseDiv.className = 'prose prose-invert';
+      proseDiv.innerHTML = html;
+      panel.appendChild(proseDiv);
+    } catch (error) {
+      loadingEl.innerHTML = `<span class="text-compare-error">Failed to load ${fileName}.md</span>`;
+    }
+  });
+  
+  // Tab switching
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const file = tab.dataset.file;
+      
+      // Update active tab
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      // Update active panel (only in tabs mode)
+      if (!content.classList.contains('side-by-side')) {
+        panels.forEach(p => {
+          p.classList.toggle('active', p.dataset.file === file);
+        });
+      }
+    });
+  });
+  
+  // View mode switching
+  viewBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const view = btn.dataset.view;
+      
+      // Update active button
+      viewBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // Update view mode
+      if (view === 'side-by-side') {
+        content.classList.add('side-by-side');
+        tabs.forEach(t => t.style.display = 'none');
+      } else {
+        content.classList.remove('side-by-side');
+        tabs.forEach(t => t.style.display = '');
+        
+        // Ensure one panel is active
+        const activeTab = container.querySelector('.text-compare-tab.active');
+        if (activeTab) {
+          const file = activeTab.dataset.file;
+          panels.forEach(p => {
+            p.classList.toggle('active', p.dataset.file === file);
+          });
+        }
+      }
+    });
+  });
+  
+  // Synchronized scrolling in side-by-side mode
+  let isScrolling = false;
+  panels.forEach(panel => {
+    panel.addEventListener('scroll', () => {
+      if (!content.classList.contains('side-by-side') || isScrolling) return;
+      
+      isScrolling = true;
+      const scrollPercentage = panel.scrollTop / (panel.scrollHeight - panel.clientHeight);
+      
+      panels.forEach(otherPanel => {
+        if (otherPanel !== panel) {
+          otherPanel.scrollTop = scrollPercentage * (otherPanel.scrollHeight - otherPanel.clientHeight);
+        }
+      });
+      
+      setTimeout(() => { isScrolling = false; }, 50);
+    });
+  });
+})();
+</script>
