@@ -7,7 +7,7 @@
         
         {{ $regularPosts := slice }}
         {{ range where .Site.RegularPages "Section" "blogs" }}
-            {{ $post := dict "title" .Title "date" .Date "dateStr" (.Date.Format "January 2, 2006") "link" .RelPermalink "summary" (cond (isset .Params "summary") .Params.summary .Summary) "tags" .Params.tags "isExternal" false }}
+            {{ $post := dict "title" .Title "date" .Date "dateStr" (.Date.Format "January 2, 2006") "link" .RelPermalink "summary" (cond (isset .Params "summary") .Params.summary .Summary) "tags" .Params.tags "image" .Params.image "isExternal" false }}
             {{ $regularPosts = $regularPosts | append $post }}
         {{ end }}
 
@@ -31,6 +31,11 @@
                 {{ end }}
             </div>
             <a href="{{ .link }}" class="block" {{ if .isExternal }}target="_blank"{{ end }}>
+                {{ if .image }}
+                <div class="mb-4 overflow-hidden rounded-lg">
+                    <img src="{{ .image }}" alt="{{ .title }}" class="w-full h-auto transition-transform duration-300 group-hover:scale-105">
+                </div>
+                {{ end }}
                 <h3 class="text-xl font-medium text-blue-400 hover:text-blue-300 transition-colors duration-200 mb-3">{{ .title }}</h3>
             </a>
             <p class="text-gray-400 mb-4">{{ .summary }}</p>
