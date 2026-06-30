@@ -16,17 +16,17 @@
 {{- $title := .Get "title" | default "marimo notebook" -}}
 {{- $runner := .Get "runner" | default "true" -}}
 {{- $id := printf "marimo-embed-%d" .Ordinal -}}
-<iframe id="{{ $id }}" src="{{ $src }}" title="{{ $title }}" loading="lazy" scrolling="no"
-  style="width:100%; min-height:600px; margin:1.5rem 0 0.5rem; border:1px solid #333; border-radius:10px; background:#121212; overflow:hidden; display:block;"
-  allow="clipboard-write"></iframe>
 {{- if ne $runner "false" }}
-<p style="margin:0 0 1.5rem; text-align:right;">
+<p style="margin:1.5rem 0 0.5rem; text-align:right;">
   <a href="{{ $src }}edit.html" target="_blank" rel="noopener"
      style="display:inline-flex; align-items:center; gap:.4rem; font-size:.9rem; color:#60a5fa; text-decoration:none; border:1px solid #333; border-radius:8px; padding:.35rem .75rem;">
     ▶ Open in a full marimo editor ↗
   </a>
 </p>
 {{- end }}
+<iframe id="{{ $id }}" src="{{ $src }}" title="{{ $title }}" loading="lazy" scrolling="no"
+  style="width:100%; min-height:600px; margin:0 0 1.5rem; border:1px solid #333; border-radius:10px; background:#121212; overflow:hidden; display:block;"
+  allow="clipboard-write"></iframe>
 <script>
 (function () {
   var f = document.getElementById("{{ $id }}");
