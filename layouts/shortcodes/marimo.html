@@ -1,0 +1,78 @@
+{{- /* Embed an exported marimo WASM notebook, themed to match this site.
+
+   Steps to embed a notebook:
+     1. Export it:  scripts/embed-marimo.sh <notebook.py> <slug>
+     2. In a post:  {{< marimo src="/notebooks/<slug>/" >}}
+
+   Params:
+     src    (default /notebooks/tinymo/) — path to the exported notebook dir
+     title  (default "marimo notebook")  — iframe title
+
+   What it does: flows the app so the page owns scrolling, hides marimo's read-mode
+   chrome, and remaps marimo's :root design tokens to the site palette + font. */ -}}
+{{- $src := .Get "src" | default "/notebooks/tinymo/" -}}
+{{- $title := .Get "title" | default "marimo notebook" -}}
+{{- $id := printf "marimo-embed-%d" .Ordinal -}}
+<iframe id="{{ $id }}" src="{{ $src }}" title="{{ $title }}" loading="lazy" scrolling="no"
+  style="width:100%; min-height:600px; margin:1.5rem 0; border:1px solid #333; border-radius:10px; background:#121212; overflow:hidden; display:block;"
+  allow="clipboard-write"></iframe>
+<script>
+(function () {
+  var f = document.getElementById("{{ $id }}");
+  if (!f) return;
+  var CSS = [
+    "@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');",
+    // flow: the page (not #App) owns scrolling
+    "html,body,#root,#App{height:auto!important;min-height:0!important;overflow:visible!important}",
+    // hide read-mode chrome
+    "[data-testid='chrome-footer'],[data-testid='disconnected-indicator']{display:none!important}",
+    // site palette -> marimo design tokens
+    ":root{",
+    "--background:#121212!important;--foreground:#ffffff!important;",
+    "--card:#1b1b1b!important;--card-foreground:#ffffff!important;",
+    "--popover:#1b1b1b!important;--popover-foreground:#ffffff!important;",
+    "--muted:#1f1f1f!important;--muted-foreground:#9ca3af!important;",
+    "--secondary:#1f1f1f!important;--secondary-foreground:#ffffff!important;",
+    "--border:#333333!important;--input:#333333!important;",
+    "--primary:#60a5fa!important;--primary-foreground:#121212!important;",
+    "--accent:#1f2937!important;--accent-foreground:#93c5fd!important;",
+    "--ring:#60a5fa!important;}",
+    "html,body{background:#121212!important;color:#ffffff!important}",
+    "body,.markdown,.prose,.prose-content,.mo-cell{font-family:'Space Grotesk',sans-serif!important}",
+    "a{color:#60a5fa!important}a:hover{color:#93c5fd!important}",
+    ".cm-editor,.cm-gutters{background:#1b1b1b!important}"
+  ].join("");
+  var raf = false;
+  function fit() {
+    raf = false;
+    try {
+      var d = f.contentWindow.document;
+      var app = d.getElementById("App");
+      var h = Math.max(
+        d.documentElement ? d.documentElement.scrollHeight : 0,
+        d.body ? d.body.scrollHeight : 0,
+        app ? app.scrollHeight : 0
+      );
+      if (h > 0) f.style.height = h + "px";
+    } catch (e) { /* same-origin only */ }
+  }
+  function schedule() { if (!raf) { raf = true; requestAnimationFrame(fit); } }
+  f.addEventListener("load", function () {
+    var d;
+    try { d = f.contentWindow.document; } catch (e) { return; }
+    try {
+      var st = d.createElement("style");
+      st.textContent = CSS;        // applies whenever marimo mounts these elements
+      d.head.appendChild(st);
+    } catch (e) {}
+    fit();
+    try {
+      var root = d.getElementById("App") || d.body;
+      new ResizeObserver(schedule).observe(root);
+      new MutationObserver(schedule).observe(root, { childList: true, subtree: true, attributes: true });
+    } catch (e) {}
+    var n = 0, iv = setInterval(function () { fit(); if (++n > 120) clearInterval(iv); }, 1000);
+  });
+  window.addEventListener("resize", schedule);
+})();
+</script>
